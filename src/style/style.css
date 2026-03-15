@@ -1,0 +1,334 @@
+/* Mengambil jenis huruf (font) Open Sans dari Google agar tulisannya bagus */
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap");
+
+/* 1. PENGATURAN DASAR (RESET) */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Open Sans", sans-serif;
+  color: #202124;
+  background-color: #f8f9fa; 
+}
+
+/* 2. KOTAK MENU DI ATAS (NAVBAR) */
+.navbar {
+  background-color: #ffffff;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  border-bottom: 2px solid #000; 
+  box-shadow: 0.25rem 0.25rem 0 rgba(0, 0, 0, 1); 
+  margin-bottom: 30px;
+}
+
+.navbar-brand {
+  font-size: 28px;
+  font-weight: 800;
+  color: #202124;
+  text-decoration: none;
+}
+
+/* Jejeran menu link */
+.navbar-menu {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.navbar-menu a {
+  color: #202124;
+  text-decoration: none;
+  font-weight: 800;
+  padding: 8px 12px;
+  border-radius: 3px;
+  border: 2px solid transparent;
+}
+
+.navbar-menu a:hover,
+.navbar-menu a.aktif {
+  background-color: #202124;
+  color: #ffffff;
+  box-shadow: 0.25rem 0.25rem 0 rgba(0, 0, 0, 1);
+  border: 2px solid #000;
+}
+
+/* 3. KOTAK-KOTAK BUNGKUSAN (DASHBOARD & INVENTORY)*/
+.container {
+  padding: 0 30px 30px 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.box-putih {
+  background-color: #ffffff;
+  padding: 25px;
+  border-radius: 3px;
+  border: 2px solid #000;
+  box-shadow: 0.25rem 0.25rem 0 rgba(0, 0, 0, 1);
+  margin-bottom: 30px;
+}
+
+.row-cards {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+.card-stat {
+  flex: 1; 
+  background-color: #ffffff;
+  padding: 25px;
+  border-radius: 3px;
+  text-align: center;
+  border: 2px solid #000;
+  box-shadow: 0.25rem 0.25rem 0 rgba(0, 0, 0, 1);
+}
+
+/* 4. TOMBOL-TOMBOL */
+.btn-hijau {
+  background-color: #39ff14; 
+  color: #000;
+  width: 100%;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 15px;
+  border: 2px solid #000;
+  border-radius: 3px;
+  cursor: pointer;
+  box-shadow: 0.25rem 0.25rem 0 rgba(0, 0, 0, 1);
+  transition: 0.2s;
+}
+
+.btn-kuning {
+  background-color: #fbbc04;
+  color: #000;
+  padding: 8px 14px;
+  text-decoration: none;
+  border: 2px solid #000;
+  border-radius: 3px;
+  font-weight: 800;
+  box-shadow: 0.2rem 0.2rem 0 rgba(0, 0, 0, 1);
+  cursor: pointer;
+  display: inline-block;
+}
+
+.btn-merah {
+  background-color: #ea4335;
+  color: white;
+  padding: 8px 14px;
+  text-decoration: none;
+  border: 2px solid #000;
+  border-radius: 3px;
+  font-weight: 800;
+  box-shadow: 0.2rem 0.2rem 0 rgba(0, 0, 0, 1);
+  cursor: pointer;
+  display: inline-block;
+}
+
+.btn-biru {
+  background-color: #4285f4;
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  border: 2px solid #000;
+  border-radius: 3px;
+  font-weight: 800;
+  box-shadow: 0.2rem 0.2rem 0 rgba(0, 0, 0, 1);
+  cursor: pointer;
+  display: inline-block;
+}
+
+/* Efek tombol sedikit melayang saat mouse menyentuh */
+.btn-hijau:hover,
+.btn-kuning:hover,
+.btn-merah:hover,
+.btn-biru:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 0.4rem 0.4rem 0 rgba(0, 0, 0, 1);
+}
+
+/* 5. HALAMAN LOGIN DAN DAFTAR */
+.layar-login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #fbbc04;
+}
+
+.kotak-login {
+  background: #fff;
+  padding: 40px;
+  border: 4px solid #000;
+  border-radius: 3px;
+  box-shadow: 0.8rem 0.8rem 0 rgba(0, 0, 0, 1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+/* Kotak untuk mengetik */
+.kolom-ketik {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #000;
+  border-radius: 3px;
+  margin-bottom: 20px;
+  font-family: "Open Sans", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0.2rem 0.2rem 0 rgba(0, 0, 0, 1);
+  box-sizing: border-box;
+  outline: none;
+  transition: 0.2s;
+}
+
+.kolom-ketik:focus {
+  background-color: #eef2f5;
+  transform: translate(-2px, -2px);
+  box-shadow: 0.4rem 0.4rem 0 rgba(0, 0, 0, 1);
+}
+
+/* 6. TABEL-TABEL */
+.tabel-brutal {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid #000;
+  background: #fff;
+  box-shadow: 0.25rem 0.25rem 0 rgba(0, 0, 0, 1);
+  margin-bottom: 20px;
+}
+
+.tabel-brutal th,
+.tabel-brutal td {
+  border: 2px solid #000;
+  padding: 15px;
+  text-align: left;
+}
+
+.tabel-brutal th {
+  background-color: #4285f4;
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+  text-transform: uppercase;
+  border-bottom: 4px solid #000;
+}
+
+/* 7. HALAMAN KASIR (POS) */
+/* Membagi layar kasir jadi kiri (70%) dan kanan (30%) */
+.kasir-wrapper {
+  display: flex;
+  gap: 20px;
+  padding: 0 30px 30px 30px;
+  height: calc(100vh - 100px);
+}
+
+.area-kiri {
+  flex: 7;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* Area keranjang (Kanan) dikunci tinggi maksimalnya */
+.area-kanan {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  background-color: #181818; 
+  padding: 20px;
+  border: 2px solid #000;
+  box-shadow: 0.25rem 0.25rem 0 rgba(0, 0, 0, 1);
+  max-height: 100%;
+}
+
+/* Kotak-kotak daftar barang (Kiri) */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
+}
+
+.card {
+  border: 2px solid #000;
+  padding: 20px 15px;
+  text-align: center;
+  border-radius: 3px;
+  cursor: pointer;
+  background-color: #ffffff;
+  box-shadow: 0.25rem 0.25rem 0 rgba(0, 0, 0, 1);
+  transition: 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Jika barang stoknya habis */
+.card.habis {
+  background-color: #ffffff;
+  border-color: #ea4335;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* KUNCI PERBAIKAN SCROLL DI KERANJANG KASIR */
+.list-keranjang {
+  flex-grow: 1; /* Penuhi ruang kosong di tengah */
+  overflow-y: auto; /* Munculkan scrollbar jika kepenuhan */
+  min-height: 0; /* Syarat wajib agar scroll berfungsi di Flexbox */
+  margin-bottom: 10px;
+  padding-right: 10px;
+}
+
+/* 8. STRUK PRINT (MESIN KASIR 58mm) */
+#area-struk {
+  display: none;
+}
+
+/* Saat tombol Print aktif (dipanggil oleh Javascript window.print) */
+@media print {
+  @page {
+    margin: 0;
+  }
+
+  /* Hilangkan sisa margin body */
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Sembunyikan semua elemen web biasa */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Tampilkan HANYA area struk */
+  #area-struk,
+  #area-struk * {
+    visibility: visible;
+  }
+
+  /* Atur ukuran struk sesuai kertas printer thermal kasir (58mm) */
+  #area-struk {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 58mm;
+    font-family: monospace; 
+    font-size: 11px;
+    padding: 4mm; 
+    color: #000;
+  }
+
+  .navbar,
+  .kasir-wrapper,
+  .container {
+    display: none;
+  }
+}
