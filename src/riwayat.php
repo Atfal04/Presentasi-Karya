@@ -7,15 +7,14 @@ if (isset($_SESSION['kasir_id']) == false) {
     exit;
 }
 
-// Ambil riwayat dari yang terbaru
-$riwayat_penjualan = mysqli_query($conn, "SELECT t.*, u.username FROM transaksi t JOIN users u ON t.kasir_id = u.id ORDER BY t.waktu_transaksi DESC");
+$perintah_ambil_riwayat = mysqli_query($conn, "SELECT transaksi.*, users.username FROM transaksi JOIN users ON transaksi.kasir_id = users.id ORDER BY transaksi.waktu_transaksi DESC");
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat - TepatKasir</title>
     <link rel="stylesheet" href="./style/style.css">
 </head>
@@ -29,42 +28,39 @@ $riwayat_penjualan = mysqli_query($conn, "SELECT t.*, u.username FROM transaksi 
             <a href="kasir.php">Kasir POS</a>
             <a href="inventory.php">Inventory</a>
             <a href="riwayat.php" class="aktif">Riwayat</a>
-            <span style="border-left:2px solid #000; padding-left:15px; margin-left:5px; font-weight:800;">
-                👋 Halo, <?= $_SESSION['username'] ?>
-            </span>
-            <a href="logout.php" style="background-color:#EA4335; color:white; border:2px solid #000;">Keluar</a>
+            <span style="border-left:2px solid #000; padding-left:15px; margin-left:5px; font-weight:900;">👋 Halo, <?= $_SESSION['username'] ?></span>
+            <a href="logout.php" class="btn-merah">Keluar</a>
         </div>
     </div>
 
     <div class="container">
-
         <div class="box-putih">
-            <h2 style="margin-top:0; border-bottom: 2px solid #000; padding-bottom:10px; margin-bottom:20px;">📜 Riwayat Semua Transaksi</h2>
+            <h2 style="margin-top:0; border-bottom: 2px solid #000; padding-bottom:10px; margin-bottom:20px;">📜 Laporan Transaksi</h2>
 
-            <table class="tabel-brutal">
-                <tr style="background-color: #FBBC04;">
-                    <th style="background-color: #FBBC04; color: #000;">Nomor Nota</th>
-                    <th style="background-color: #FBBC04; color: #000;">Waktu</th>
-                    <th style="background-color: #FBBC04; color: #000;">Kasir</th>
-                    <th style="background-color: #FBBC04; color: #000;">Total Belanja</th>
-                    <th style="background-color: #FBBC04; color: #000;">Uang Masuk</th>
-                    <th style="background-color: #FBBC04; color: #000;">Kembalian</th>
-                </tr>
-
-                <?php while ($riwayat = mysqli_fetch_assoc($riwayat_penjualan)): ?>
+            <div class="wadah-tabel">
+                <table class="tabel-brutal">
                     <tr>
-                        <td style="font-weight:bold;">TRX-<?= $riwayat['id'] ?></td>
-                        <td style="font-weight:600;"><?= date('d M Y - H:i', strtotime($riwayat['waktu_transaksi'])) ?></td>
-                        <td style="font-weight:800; color:#4285F4;"><?= $riwayat['username'] ?></td>
-                        <td style="font-weight:800; color:#34A853; font-size:18px;">Rp <?= number_format($riwayat['total_belanja'], 0, ',', '.') ?></td>
-                        <td style="font-weight:600;">Rp <?= number_format($riwayat['uang_bayar'], 0, ',', '.') ?></td>
-                        <td style="font-weight:600; color:#EA4335;">Rp <?= number_format($riwayat['kembalian'], 0, ',', '.') ?></td>
+                        <th style="background-color: #FBBC04; color: #000;">No. Nota</th>
+                        <th style="background-color: #FBBC04; color: #000;">Waktu</th>
+                        <th style="background-color: #FBBC04; color: #000;">Nama Kasir</th>
+                        <th style="background-color: #FBBC04; color: #000;">Total Belanja</th>
+                        <th style="background-color: #FBBC04; color: #000;">Tunai</th>
+                        <th style="background-color: #FBBC04; color: #000;">Kembalian</th>
                     </tr>
-                <?php endwhile; ?>
+                    <?php while ($data_riwayat = mysqli_fetch_assoc($perintah_ambil_riwayat)): ?>
+                        <tr>
+                            <td style="font-weight:900;">TRX-<?= $data_riwayat['id'] ?></td>
+                            <td style="font-weight:700;"><?= date('d M Y - H:i', strtotime($data_riwayat['waktu_transaksi'])) ?></td>
+                            <td style="font-weight:900; color:#4285F4;"><?= $data_riwayat['username'] ?></td>
+                            <td style="font-weight:900; color:#34A853; font-size:18px;">Rp <?= number_format($data_riwayat['total_belanja'], 0, ',', '.') ?></td>
+                            <td style="font-weight:700;">Rp <?= number_format($data_riwayat['uang_bayar'], 0, ',', '.') ?></td>
+                            <td style="font-weight:700; color:#EA4335;">Rp <?= number_format($data_riwayat['kembalian'], 0, ',', '.') ?></td>
+                        </tr>
+                    <?php endwhile; ?>
+                </table>
+            </div>
 
-            </table>
         </div>
-
     </div>
 </body>
 

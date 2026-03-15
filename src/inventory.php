@@ -1,54 +1,63 @@
 <?php
+// 1. NYALAKAN SESI DAN KONEKSI DATABASE
 session_start();
 include './lib/koneksi.php';
 
-// Cek apakah sudah login
+// Kalau belum login, usir ke halaman login
 if (isset($_SESSION['kasir_id']) == false) {
     header("Location: index.php");
     exit;
 }
 
-// LOGIKA MENAMBAH BARANG BARU
-if (isset($_POST['tombol_tambah'])) {
-    $nama = $_POST['nama_produk'];
-    $harga = $_POST['harga'];
-    $stok = $_POST['stok'];
+// ==========================================================
+// 2. LOGIKA JIKA TOMBOL "SIMPAN" (TAMBAH BARANG BARU) DITEKAN
+// ==========================================================
+if (isset($_POST['tombol_simpan_barang'])) {
+    $nama_baru = $_POST['isian_nama'];
+    $harga_baru = $_POST['isian_harga'];
+    $stok_baru = $_POST['isian_stok'];
 
-    mysqli_query($conn, "INSERT INTO produk (nama_produk, harga, stok) VALUES ('$nama', '$harga', '$stok')");
+    mysqli_query($conn, "INSERT INTO produk (nama_produk, harga, stok) VALUES ('$nama_baru', '$harga_baru', '$stok_baru')");
     header("Location: inventory.php");
     exit;
 }
 
-// LOGIKA MENGEDIT BARANG LAMA
-if (isset($_POST['tombol_update'])) {
-    $id_yang_diedit = $_POST['id_produk'];
-    $nama_baru = $_POST['nama_produk'];
-    $harga_baru = $_POST['harga'];
-    $stok_baru = $_POST['stok'];
+// ==========================================================
+// 3. LOGIKA JIKA TOMBOL "UPDATE" (SIMPAN EDITAN) DITEKAN
+// ==========================================================
+if (isset($_POST['tombol_update_barang'])) {
+    $id_yang_diedit = $_POST['id_rahasia'];
+    $nama_edit = $_POST['isian_nama'];
+    $harga_edit = $_POST['isian_harga'];
+    $stok_edit = $_POST['isian_stok'];
 
-    mysqli_query($conn, "UPDATE produk SET nama_produk='$nama_baru', harga='$harga_baru', stok='$stok_baru' WHERE id='$id_yang_diedit'");
+    mysqli_query($conn, "UPDATE produk SET nama_produk='$nama_edit', harga='$harga_edit', stok='$stok_edit' WHERE id='$id_yang_diedit'");
     header("Location: inventory.php");
     exit;
 }
 
-// LOGIKA MENGHAPUS BARANG
+// ==========================================================
+// 4. LOGIKA JIKA TOMBOL "HAPUS" DITEKAN
+// ==========================================================
 if (isset($_GET['hapus'])) {
-    $id_hapus = $_GET['hapus'];
-    mysqli_query($conn, "DELETE FROM produk WHERE id = '$id_hapus'");
+    $id_yang_dihapus = $_GET['hapus'];
+    mysqli_query($conn, "DELETE FROM produk WHERE id = '$id_yang_dihapus'");
     header("Location: inventory.php");
     exit;
 }
 
-// MENGAMBIL DATA UNTUK DITAMPILKAN DI FORM EDIT
-$data_edit = null; // Default kosong
+// ==========================================================
+// 5. PERSIAPAN DATA UNTUK KOTAK EDIT
+// ==========================================================
+$data_barang_edit = null;
 if (isset($_GET['edit'])) {
-    $id_get = $_GET['edit'];
-    $query_edit = mysqli_query($conn, "SELECT * FROM produk WHERE id='$id_get'");
-    $data_edit = mysqli_fetch_assoc($query_edit);
+    $id_mau_di_edit = $_GET['edit'];
+    $perintah_cari = mysqli_query($conn, "SELECT * FROM produk WHERE id='$id_mau_di_edit'");
+    $data_barang_edit = mysqli_fetch_assoc($perintah_cari);
 }
 
-// Ambil semua data barang untuk ditampilkan di tabel bawah
-$semua_barang = mysqli_query($conn, "SELECT * FROM produk ORDER BY id DESC");
+// Mengambil semua barang untuk tabel
+$semua_daftar_barang = mysqli_query($conn, "SELECT * FROM produk ORDER BY id DESC");
 ?>
 
 <!DOCTYPE html>
@@ -56,8 +65,8 @@ $semua_barang = mysqli_query($conn, "SELECT * FROM produk ORDER BY id DESC");
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory - TepatKasir</title>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style/style.css">
 </head>
 
@@ -70,76 +79,86 @@ $semua_barang = mysqli_query($conn, "SELECT * FROM produk ORDER BY id DESC");
             <a href="kasir.php">Kasir POS</a>
             <a href="inventory.php" class="aktif">Inventory</a>
             <a href="riwayat.php">Riwayat</a>
-            <span style="border-left:2px solid #000; padding-left:15px; margin-left:5px; font-weight:800;">
+            <span style="border-left:2px solid #000; padding-left:15px; margin-left:5px; font-weight:900;">
                 👋 Halo, <?= $_SESSION['username'] ?>
             </span>
-            <a href="logout.php" style="background-color:#EA4335; color:white; border:2px solid #000;">Keluar</a>
+            <a href="logout.php" class="btn-merah">Keluar</a>
         </div>
     </div>
 
     <div class="container">
 
         <div class="box-putih">
+            <?php if ($data_barang_edit != null) { ?>
 
-            <?php if ($data_edit != null): ?>
-                <h2 style="margin-top:0; border-bottom: 2px solid #000; padding-bottom:10px; margin-bottom:20px; color:#FBBC04; text-shadow: 1px 1px 0px #000;">
+                <h2 style="margin-top:0; border-bottom: 2px solid #000; padding-bottom:10px; margin-bottom:20px;">
                     ✏️ Edit Data Barang
                 </h2>
 
-                <form method="POST" style="display:flex; gap:15px; align-items:center;">
-                    <input type="hidden" name="id_produk" value="<?= $data_edit['id'] ?>">
+                <form method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: center;">
+                    <input type="hidden" name="id_rahasia" value="<?= $data_barang_edit['id'] ?>">
 
-                    <input type="text" name="nama_produk" class="kolom-ketik" value="<?= $data_edit['nama_produk'] ?>" required style="margin-bottom:0;">
-                    <input type="number" name="harga" class="kolom-ketik" value="<?= $data_edit['harga'] ?>" required style="margin-bottom:0;">
-                    <input type="number" name="stok" class="kolom-ketik" value="<?= $data_edit['stok'] ?>" required style="margin-bottom:0; width:150px;">
+                    <input type="text" name="isian_nama" class="kolom-ketik" value="<?= $data_barang_edit['nama_produk'] ?>" required style="margin-bottom:0;">
+                    <input type="number" name="isian_harga" class="kolom-ketik" value="<?= $data_barang_edit['harga'] ?>" required style="margin-bottom:0;">
+                    <input type="number" name="isian_stok" class="kolom-ketik" value="<?= $data_barang_edit['stok'] ?>" required style="margin-bottom:0;">
 
-                    <button type="submit" name="tombol_update" class="btn-kuning" style="padding:15px 30px; font-size:16px;">UPDATE</button>
-                    <a href="inventory.php" class="btn-merah" style="padding:15px 20px; font-size:16px;">BATAL</a>
+                    <button type="submit" name="tombol_update_barang" class="btn-kuning" style="padding:15px; width:100%;">UPDATE</button>
+                    <a href="inventory.php" class="btn-merah" style="padding:15px; text-align:center; display:block; width:100%; box-sizing:border-box;">BATAL</a>
                 </form>
 
-            <?php else: ?>
+            <?php } else { ?>
+
                 <h2 style="margin-top:0; border-bottom: 2px solid #000; padding-bottom:10px; margin-bottom:20px;">
                     📦 Tambah Barang Baru
                 </h2>
 
-                <form method="POST" style="display:flex; gap:15px; align-items:center;">
-                    <input type="text" name="nama_produk" class="kolom-ketik" placeholder="Nama Barang" required style="margin-bottom:0;">
-                    <input type="number" name="harga" class="kolom-ketik" placeholder="Harga (Rp)" required style="margin-bottom:0;">
-                    <input type="number" name="stok" class="kolom-ketik" placeholder="Jumlah Stok" required style="margin-bottom:0; width:150px;">
+                <form method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: center;">
+                    <input type="text" name="isian_nama" class="kolom-ketik" placeholder="Nama Barang" required style="margin-bottom:0;">
+                    <input type="number" name="isian_harga" class="kolom-ketik" placeholder="Harga (Rp)" required style="margin-bottom:0;">
+                    <input type="number" name="isian_stok" class="kolom-ketik" placeholder="Jumlah Stok" required style="margin-bottom:0;">
 
-                    <button type="submit" name="tombol_tambah" class="btn-biru" style="padding:15px 30px; font-size:16px;">SIMPAN</button>
+                    <button type="submit" name="tombol_simpan_barang" class="btn-biru" style="padding:15px; width:100%;">SIMPAN</button>
                 </form>
-            <?php endif; ?>
 
+            <?php } ?>
         </div>
 
         <div class="box-putih">
             <h2 style="margin-top:0; border-bottom: 2px solid #000; padding-bottom:10px; margin-bottom:20px;">📋 Daftar Barang di Gudang</h2>
 
-            <table class="tabel-brutal">
-                <tr>
-                    <th>ID</th>
-                    <th>Nama Barang</th>
-                    <th>Harga</th>
-                    <th>Stok Tersedia</th>
-                    <th>Aksi</th>
-                </tr>
-                <?php while ($barang = mysqli_fetch_assoc($semua_barang)): ?>
+            <div class="wadah-tabel" style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 10px;">
+                <table class="tabel-brutal" style="min-width: 600px;">
                     <tr>
-                        <td style="font-weight:bold;">#<?= $barang['id'] ?></td>
-                        <td style="font-weight:800;"><?= $barang['nama_produk'] ?></td>
-                        <td style="color:#34A853; font-weight:800;">Rp <?= number_format($barang['harga'], 0, ',', '.') ?></td>
-                        <td style="font-weight:800; font-size:18px; <?= ($barang['stok'] <= 10) ? 'color:#EA4335;' : '' ?>">
-                            <?= $barang['stok'] ?>
-                        </td>
-                        <td>
-                            <a href="inventory.php?edit=<?= $barang['id'] ?>" class="btn-kuning" style="margin-right: 5px;">Edit</a>
-
-                            <a href="inventory.php?hapus=<?= $barang['id'] ?>" class="btn-merah" onclick="return confirm('Yakin ingin menghapus <?= $barang['nama_produk'] ?> dari sistem?')">Hapus</a>
-                        </td>
+                        <th style="background-color: #4285F4; color: #fff;">ID</th>
+                        <th style="background-color: #4285F4; color: #fff;">Nama Barang</th>
+                        <th style="background-color: #4285F4; color: #fff;">Harga</th>
+                        <th style="background-color: #4285F4; color: #fff;">Stok Tersedia</th>
+                        <th style="background-color: #4285F4; color: #fff;">Aksi</th>
                     </tr>
-                <?php endwhile; ?>
-            </table>
+
+                    <?php while ($barang = mysqli_fetch_assoc($semua_daftar_barang)): ?>
+                        <tr>
+                            <td style="font-weight:900;">#<?= $barang['id'] ?></td>
+                            <td style="font-weight:700;"><?= $barang['nama_produk'] ?></td>
+                            <td style="font-weight:900; color:#34A853;">Rp <?= number_format($barang['harga'], 0, ',', '.') ?></td>
+
+                            <td style="font-weight:900; font-size:18px;">
+                                <?php if ($barang['stok'] <= 10) { ?>
+                                    <span style="color:#EA4335;"><?= $barang['stok'] ?></span>
+                                <?php } else { ?>
+                                    <?= $barang['stok'] ?>
+                                <?php } ?>
+                            </td>
+
+                            <td style="white-space: nowrap;">
+                                <a href="inventory.php?edit=<?= $barang['id'] ?>" class="btn-kuning">Edit</a>
+                                <a href="inventory.php?hapus=<?= $barang['id'] ?>" class="btn-merah" onclick="return confirm('Apakah kamu yakin ingin menghapus barang ini?')">Hapus</a>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+
+                </table>
+            </div>
         </div>
 
     </div>
