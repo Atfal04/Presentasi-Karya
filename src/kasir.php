@@ -161,7 +161,7 @@ $semua_barang_toko = mysqli_query($conn, "SELECT * FROM produk ORDER BY nama_pro
 
             <div id="area-input-uang" style="margin-top:20px;">
                 <label style="font-weight:bold; display:block; margin-bottom:5px;">Jumlah Uang Pelanggan (Rp):</label>
-                <input type="number" id="uang_pelanggan_temp" class="kolom-ketik" placeholder="Contoh: 100000" style="margin-bottom:0; font-size:20px;">
+                <input type="number" id="uang_pelanggan_temp" class="kolom-ketik" placeholder="Contoh: 100000" min="0" oninput="if(this.value < 0) this.value = 0;" style="margin-bottom:0; font-size:20px;">
             </div>
 
             <div style="display:flex; gap:10px; margin-top:20px;">

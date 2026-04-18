@@ -101,8 +101,8 @@ $semua_daftar_barang = mysqli_query($conn, "SELECT * FROM produk ORDER BY id DES
                     <input type="hidden" name="id_rahasia" value="<?= $data_barang_edit['id'] ?>">
 
                     <input type="text" name="isian_nama" class="kolom-ketik" value="<?= $data_barang_edit['nama_produk'] ?>" required style="margin-bottom:0;">
-                    <input type="number" name="isian_harga" class="kolom-ketik" value="<?= $data_barang_edit['harga'] ?>" required style="margin-bottom:0;">
-                    <input type="number" name="isian_stok" class="kolom-ketik" value="<?= $data_barang_edit['stok'] ?>" required style="margin-bottom:0;">
+                    <input type="number" name="isian_harga" class="kolom-ketik" value="<?= $data_barang_edit['harga'] ?>" required min="0" oninput="if(this.value < 0) this.value = 0;" style="margin-bottom:0;">
+                    <input type="number" name="isian_stok" class="kolom-ketik" value="<?= $data_barang_edit['stok'] ?>" required min="0" oninput="if(this.value < 0) this.value = 0;" style="margin-bottom:0;">
                     <input type="text" name="isian_satuan" class="kolom-ketik" value="<?= $data_barang_edit['satuan'] ?? '' ?>" required placeholder="Satuan (Pcs/Kg)" style="margin-bottom:0;">
 
                     <button type="submit" name="tombol_update_barang" class="btn-kuning" style="padding:15px; width:100%;">UPDATE</button>
@@ -117,8 +117,8 @@ $semua_daftar_barang = mysqli_query($conn, "SELECT * FROM produk ORDER BY id DES
 
                 <form method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: center;">
                     <input type="text" name="isian_nama" class="kolom-ketik" placeholder="Nama Barang" required style="margin-bottom:0;">
-                    <input type="number" name="isian_harga" class="kolom-ketik" placeholder="Harga (Rp)" required style="margin-bottom:0;">
-                    <input type="number" name="isian_stok" class="kolom-ketik" placeholder="Jumlah Stok" required style="margin-bottom:0;">
+                    <input type="number" name="isian_harga" class="kolom-ketik" placeholder="Harga (Rp)" required min="0" oninput="if(this.value < 0) this.value = 0;" style="margin-bottom:0;">
+                    <input type="number" name="isian_stok" class="kolom-ketik" placeholder="Jumlah Stok" required min="0" oninput="if(this.value < 0) this.value = 0;" style="margin-bottom:0;">
                     <input type="text" name="isian_satuan" class="kolom-ketik" placeholder="Satuan (Pcs/Kg)" required style="margin-bottom:0;">
 
                     <button type="submit" name="tombol_simpan_barang" class="btn-biru" style="padding:15px; width:100%;">SIMPAN</button>
