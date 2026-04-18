@@ -16,8 +16,9 @@ if (isset($_POST['tombol_simpan_barang'])) {
     $nama_baru = $_POST['isian_nama'];
     $harga_baru = $_POST['isian_harga'];
     $stok_baru = $_POST['isian_stok'];
+    $satuan_baru = $_POST['isian_satuan'];
 
-    mysqli_query($conn, "INSERT INTO produk (nama_produk, harga, stok) VALUES ('$nama_baru', '$harga_baru', '$stok_baru')");
+    mysqli_query($conn, "INSERT INTO produk (nama_produk, harga, stok, satuan) VALUES ('$nama_baru', '$harga_baru', '$stok_baru', '$satuan_baru')");
     header("Location: inventory.php");
     exit;
 }
@@ -30,8 +31,9 @@ if (isset($_POST['tombol_update_barang'])) {
     $nama_edit = $_POST['isian_nama'];
     $harga_edit = $_POST['isian_harga'];
     $stok_edit = $_POST['isian_stok'];
+    $satuan_edit = $_POST['isian_satuan'];
 
-    mysqli_query($conn, "UPDATE produk SET nama_produk='$nama_edit', harga='$harga_edit', stok='$stok_edit' WHERE id='$id_yang_diedit'");
+    mysqli_query($conn, "UPDATE produk SET nama_produk='$nama_edit', harga='$harga_edit', stok='$stok_edit', satuan='$satuan_edit' WHERE id='$id_yang_diedit'");
     header("Location: inventory.php");
     exit;
 }
@@ -76,7 +78,7 @@ $semua_daftar_barang = mysqli_query($conn, "SELECT * FROM produk ORDER BY id DES
         <a href="#" class="navbar-brand">TepatKasir</a>
         <div class="navbar-menu">
             <a href="dashboard.php">Dashboard</a>
-            <a href="kasir.php">Kasir POS</a>
+            <a href="kasir.php">Kasir</a>
             <a href="inventory.php" class="aktif">Inventory</a>
             <a href="riwayat.php">Riwayat</a>
             <span style="border-left:2px solid #000; padding-left:15px; margin-left:5px; font-weight:900;">
@@ -101,6 +103,7 @@ $semua_daftar_barang = mysqli_query($conn, "SELECT * FROM produk ORDER BY id DES
                     <input type="text" name="isian_nama" class="kolom-ketik" value="<?= $data_barang_edit['nama_produk'] ?>" required style="margin-bottom:0;">
                     <input type="number" name="isian_harga" class="kolom-ketik" value="<?= $data_barang_edit['harga'] ?>" required style="margin-bottom:0;">
                     <input type="number" name="isian_stok" class="kolom-ketik" value="<?= $data_barang_edit['stok'] ?>" required style="margin-bottom:0;">
+                    <input type="text" name="isian_satuan" class="kolom-ketik" value="<?= $data_barang_edit['satuan'] ?? '' ?>" required placeholder="Satuan (Pcs/Kg)" style="margin-bottom:0;">
 
                     <button type="submit" name="tombol_update_barang" class="btn-kuning" style="padding:15px; width:100%;">UPDATE</button>
                     <a href="inventory.php" class="btn-merah" style="padding:15px; text-align:center; display:block; width:100%; box-sizing:border-box;">BATAL</a>
@@ -116,6 +119,7 @@ $semua_daftar_barang = mysqli_query($conn, "SELECT * FROM produk ORDER BY id DES
                     <input type="text" name="isian_nama" class="kolom-ketik" placeholder="Nama Barang" required style="margin-bottom:0;">
                     <input type="number" name="isian_harga" class="kolom-ketik" placeholder="Harga (Rp)" required style="margin-bottom:0;">
                     <input type="number" name="isian_stok" class="kolom-ketik" placeholder="Jumlah Stok" required style="margin-bottom:0;">
+                    <input type="text" name="isian_satuan" class="kolom-ketik" placeholder="Satuan (Pcs/Kg)" required style="margin-bottom:0;">
 
                     <button type="submit" name="tombol_simpan_barang" class="btn-biru" style="padding:15px; width:100%;">SIMPAN</button>
                 </form>
@@ -133,6 +137,7 @@ $semua_daftar_barang = mysqli_query($conn, "SELECT * FROM produk ORDER BY id DES
                         <th style="background-color: #4285F4; color: #fff;">Nama Barang</th>
                         <th style="background-color: #4285F4; color: #fff;">Harga</th>
                         <th style="background-color: #4285F4; color: #fff;">Stok Tersedia</th>
+                        <th style="background-color: #4285F4; color: #fff;">Satuan</th>
                         <th style="background-color: #4285F4; color: #fff;">Aksi</th>
                     </tr>
 
@@ -149,6 +154,7 @@ $semua_daftar_barang = mysqli_query($conn, "SELECT * FROM produk ORDER BY id DES
                                     <?= $barang['stok'] ?>
                                 <?php } ?>
                             </td>
+                            <td style="font-weight:700;"><?= $barang['satuan'] ?? '-' ?></td>
 
                             <td style="white-space: nowrap;">
                                 <a href="inventory.php?edit=<?= $barang['id'] ?>" class="btn-kuning">Edit</a>

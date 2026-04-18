@@ -63,7 +63,7 @@ for ($angka = 6; $angka >= 0; $angka--) {
         <a href="#" class="navbar-brand">TepatKasir</a>
         <div class="navbar-menu">
             <a href="dashboard.php" class="aktif">Dashboard</a>
-            <a href="kasir.php">Kasir POS</a>
+            <a href="kasir.php">Kasir</a>
             <a href="inventory.php">Inventory</a>
             <a href="riwayat.php">Riwayat</a>
             <span style="border-left:2px solid #000; padding-left:15px; margin-left:5px; font-weight:900;">👋 Halo, <?= $_SESSION['username'] ?></span>

@@ -14,10 +14,11 @@ if (isset($_SESSION['kasir_id']) == false) {
 // =====================================================================
 if (isset($_POST['tombol_submit_bayar'])) {
 
-    // Ambil tagihan, uang pelanggan, dan hitung kembaliannya
+    // Ambil tagihan, uang pelanggan, perhitungan, dan tipe
     $total_tagihan = $_POST['total_tagihan_rahasia'];
     $uang_dari_pelanggan = $_POST['uang_pelanggan'];
     $uang_kembalian = $uang_dari_pelanggan - $total_tagihan;
+    $tipe_pembayaran = $_POST['tipe_pembayaran_rahasia'] ?? 'Tunai';
 
     // Ubah data keranjang (yang dikirim Javascript) jadi daftar yang bisa dibaca PHP
     $daftar_belanjaan = json_decode($_POST['data_keranjang_rahasia'], true);
@@ -25,14 +26,23 @@ if (isset($_POST['tombol_submit_bayar'])) {
     // Kalau uang pelanggan cukup, tagihan tidak 0, dan keranjang tidak kosong
     if ($uang_dari_pelanggan >= $total_tagihan && $total_tagihan > 0 && !empty($daftar_belanjaan)) {
 
-        // Simpan ke buku riwayat transaksi
+        // 1. Simpan ke buku riwayat transaksi utama
         $id_kasir_yang_jaga = $_SESSION['kasir_id'];
-        mysqli_query($conn, "INSERT INTO transaksi (kasir_id, total_belanja, uang_bayar, kembalian) VALUES ('$id_kasir_yang_jaga', '$total_tagihan', '$uang_dari_pelanggan', '$uang_kembalian')");
+        mysqli_query($conn, "INSERT INTO transaksi (kasir_id, total_belanja, uang_bayar, kembalian, tipe_pembayaran) VALUES ('$id_kasir_yang_jaga', '$total_tagihan', '$uang_dari_pelanggan', '$uang_kembalian', '$tipe_pembayaran')");
+        
+        // Ambil ID Transaksi yang baru saja dibuat
+        $transaksi_id_baru = mysqli_insert_id($conn);
 
-        // Buka daftar keranjang satu per satu, kurangi stoknya di gudang
+        // 2. Buka daftar keranjang satu per satu
         foreach ($daftar_belanjaan as $barang) {
             $id_yang_dibeli = $barang['id_barang'];
             $jumlah_yang_dibeli = $barang['jumlah'];
+            $harga_satuan_dibeli = $barang['harga_satuan'];
+            
+            // Masukkan rincian barang ke tabel relasi transaksi_detail
+            mysqli_query($conn, "INSERT INTO transaksi_detail (transaksi_id, produk_id, jumlah, harga_satuan) VALUES ('$transaksi_id_baru', '$id_yang_dibeli', '$jumlah_yang_dibeli', '$harga_satuan_dibeli')");
+
+            // Kurangi stoknya di gudang produk
             mysqli_query($conn, "UPDATE produk SET stok = stok - $jumlah_yang_dibeli WHERE id = '$id_yang_dibeli'");
         }
 
@@ -54,16 +64,16 @@ $semua_barang_toko = mysqli_query($conn, "SELECT * FROM produk ORDER BY nama_pro
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kasir - TepatKasir</title>
-    <link rel="stylesheet" href="./style/style.css">
+    <link rel="stylesheet" href="./style/style.css?v=2">
 </head>
 
-<body>
+<body class="mode-kasir">
 
     <div class="navbar">
         <a href="#" class="navbar-brand">TepatKasir</a>
         <div class="navbar-menu">
             <a href="dashboard.php">Dashboard</a>
-            <a href="kasir.php" class="aktif">Kasir POS</a>
+            <a href="kasir.php" class="aktif">Kasir</a>
             <a href="inventory.php">Inventory</a>
             <a href="riwayat.php">Riwayat</a>
             <span style="border-left:2px solid #000; padding-left:15px; margin-left:5px; font-weight:900;">👋 Halo, <?= $_SESSION['username'] ?></span>
@@ -103,13 +113,14 @@ $semua_barang_toko = mysqli_query($conn, "SELECT * FROM produk ORDER BY nama_pro
 
                 <h2 id="layar_total_harga" style="color: #39FF14; font-size: 36px; font-weight: 900; margin-top: 10px; margin-bottom: 15px;">Total: Rp 0</h2>
 
-                <form method="POST" onsubmit="return pastikanBisaBayar()">
+                <form method="POST" id="formKasir">
                     <input type="hidden" name="total_tagihan_rahasia" id="input_total">
                     <input type="hidden" name="data_keranjang_rahasia" id="input_data_keranjang">
+                    <input type="hidden" name="tipe_pembayaran_rahasia" id="input_tipe_pembayaran" value="Tunai">
+                    <input type="hidden" name="uang_pelanggan" id="input_uang_pelanggan">
+                    <button type="submit" name="tombol_submit_bayar" id="btn_submit_asli" style="display:none;"></button>
 
-                    <input type="number" name="uang_pelanggan" required placeholder="Uang Pelanggan (Rp)" style="width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #000; border-radius: 4px; font-size: 16px; font-weight: bold; outline: none; box-sizing: border-box;">
-
-                    <button type="submit" name="tombol_submit_bayar" style="width: 100%; background-color: #39FF14; color: #000; font-size: 18px; font-weight: 900; padding: 15px; border: 2px solid #000; border-radius: 4px; cursor: pointer; box-shadow: 2px 2px 0px #000; text-transform: uppercase;">BAYAR & CETAK STRUK</button>
+                    <button type="button" onclick="bukaModalPembayaran()" style="width: 100%; background-color: #39FF14; color: #000; font-size: 18px; font-weight: 900; padding: 15px; border: 2px solid #000; border-radius: 4px; cursor: pointer; box-shadow: 2px 2px 0px #000; text-transform: uppercase;">BAYAR SEKARANG</button>
                 </form>
             </div>
 
@@ -135,7 +146,8 @@ $semua_barang_toko = mysqli_query($conn, "SELECT * FROM produk ORDER BY nama_pro
 
             <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
             <div style="display:flex; justify-content:space-between; font-weight:bold;"><span>TOTAL:</span> <span>Rp <?= number_format($cetak_total, 0, ',', '.') ?></span></div>
-            <div style="display:flex; justify-content:space-between;"><span>TUNAI:</span> <span>Rp <?= number_format($cetak_bayar, 0, ',', '.') ?></span></div>
+            <div style="display:flex; justify-content:space-between;"><span>METODE:</span> <span><?= strtoupper($_POST['tipe_pembayaran_rahasia'] ?? 'TUNAI') ?></span></div>
+            <div style="display:flex; justify-content:space-between;"><span>BAYAR:</span> <span>Rp <?= number_format($cetak_bayar, 0, ',', '.') ?></span></div>
             <div style="display:flex; justify-content:space-between;"><span>KEMBALI:</span> <span>Rp <?= number_format($cetak_kembali, 0, ',', '.') ?></span></div>
             <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
         </div>
@@ -147,6 +159,55 @@ $semua_barang_toko = mysqli_query($conn, "SELECT * FROM produk ORDER BY nama_pro
         </script>
     <?php endif; ?>
 
+    <!-- MODAL 1: Pilih Pembayaran -->
+    <div id="modalPembayaran" class="modal-overlay">
+        <div class="modal-box">
+            <h3 class="modal-title">💳 Pilih Pembayaran</h3>
+            
+            <div style="display:flex; gap:10px;">
+                <button type="button" id="btn-tunai" class="btn-opsi-pembayaran tunai terpilih" onclick="pilihMetode('Tunai')">Tunai (Cash)</button>
+                <button type="button" id="btn-transfer" class="btn-opsi-pembayaran transfer" onclick="pilihMetode('Transfer')">Transfer</button>
+                <button type="button" id="btn-qris" class="btn-opsi-pembayaran qris" onclick="pilihMetode('QRIS')">QRIS</button>
+            </div>
+
+            <div id="area-input-uang" style="margin-top:20px;">
+                <label style="font-weight:bold; display:block; margin-bottom:5px;">Jumlah Uang Pelanggan (Rp):</label>
+                <input type="number" id="uang_pelanggan_temp" class="kolom-ketik" placeholder="Contoh: 100000" style="margin-bottom:0; font-size:20px;">
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button type="button" onclick="tutupModal()" class="btn-merah" style="padding:15px; width:40%; text-align:center;">Batal</button>
+                <button type="button" onclick="lanjutKeReview()" class="btn-biru" style="padding:15px; width:60%; font-size:16px;">Lanjut Review ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Review Pesanan -->
+    <div id="modalReview" class="modal-overlay">
+        <div class="modal-box">
+            <h3 class="modal-title">🧾 Review Pesanan</h3>
+            
+            <div id="detail-review" style="background:#f8f9fa; padding:15px; border:2px solid #000; border-radius:4px; margin-bottom:20px; max-height:200px; overflow-y:auto;">
+                <!-- Item keranjang -->
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <div style="display:flex; justify-content:space-between; font-weight:800; font-size:18px; margin-bottom:10px;">
+                    <span>Metode:</span>
+                    <span id="review-metode" style="color:#4285F4;">Tunai</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-weight:900; font-size:24px;">
+                    <span>Total:</span>
+                    <span id="review-total" style="color:#34A853;">Rp 0</span>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button type="button" onclick="kembaliKeModalPembayaran()" class="btn-kuning" style="padding:15px; width:40%; text-align:center;">Kembali</button>
+                <button type="button" onclick="kirimFormKasir()" class="btn-hijau" style="padding:15px; width:60%; font-size:16px;">✅ KONFIRMASI & CETAK</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // 1. FUNGSI PENCARIAN BARANG
@@ -255,13 +316,84 @@ $semua_barang_toko = mysqli_query($conn, "SELECT * FROM produk ORDER BY nama_pro
             document.getElementById('input_data_keranjang').value = JSON.stringify(keranjang_belanja);
         }
 
-        // 5. FUNGSI CEK SEBELUM BAYAR
-        function pastikanBisaBayar() {
+        // 5. ALUR PAYMENT MODALS (FUNGSI BARU)
+        let metodeAktif = 'Tunai';
+
+        function bukaModalPembayaran() {
             if (keranjang_belanja.length == 0) {
-                alert("Pilih barang terlebih dahulu!");
-                return false;
+                alert("Keranjang kosong! Silakan pilih barang dulu.");
+                return;
             }
-            return true;
+            document.getElementById('modalPembayaran').style.display = 'block';
+            if (metodeAktif === 'Tunai') {
+                document.getElementById('uang_pelanggan_temp').value = ''; 
+                document.getElementById('uang_pelanggan_temp').focus();
+            }
+        }
+
+        function tutupModal() {
+            document.getElementById('modalPembayaran').style.display = 'none';
+            document.getElementById('modalReview').style.display = 'none';
+        }
+
+        function pilihMetode(metode) {
+            metodeAktif = metode;
+            document.getElementById('btn-tunai').classList.remove('terpilih');
+            document.getElementById('btn-transfer').classList.remove('terpilih');
+            document.getElementById('btn-qris').classList.remove('terpilih');
+            
+            document.getElementById('btn-' + metode.toLowerCase()).classList.add('terpilih');
+
+            let areaUang = document.getElementById('area-input-uang');
+            let inputUang = document.getElementById('uang_pelanggan_temp');
+            let total = document.getElementById('input_total').value;
+
+            if (metode === 'Tunai') {
+                areaUang.style.display = 'block';
+                inputUang.value = '';
+                inputUang.focus();
+            } else {
+                areaUang.style.display = 'none';
+                inputUang.value = total;
+            }
+        }
+
+        function lanjutKeReview() {
+            let total = parseInt(document.getElementById('input_total').value);
+            let uangTemp = parseInt(document.getElementById('uang_pelanggan_temp').value);
+
+            if (isNaN(uangTemp) || uangTemp < total) {
+                alert("Uang pelanggan kurang atau tidak valid!");
+                return;
+            }
+
+            document.getElementById('input_tipe_pembayaran').value = metodeAktif;
+            document.getElementById('input_uang_pelanggan').value = uangTemp;
+
+            let htmlReview = '';
+            for (let i = 0; i < keranjang_belanja.length; i++) {
+                let brg = keranjang_belanja[i];
+                htmlReview += '<div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #ccc; padding-bottom:5px;">';
+                htmlReview += '<span style="font-weight:800;">' + brg.nama_barang + ' (x' + brg.jumlah + ')</span>';
+                htmlReview += '<span style="font-weight:900;">Rp ' + (brg.harga_satuan * brg.jumlah).toLocaleString('id-ID') + '</span>';
+                htmlReview += '</div>';
+            }
+            
+            document.getElementById('detail-review').innerHTML = htmlReview;
+            document.getElementById('review-metode').innerText = metodeAktif;
+            document.getElementById('review-total').innerText = "Rp " + total.toLocaleString('id-ID');
+
+            document.getElementById('modalPembayaran').style.display = 'none';
+            document.getElementById('modalReview').style.display = 'block';
+        }
+
+        function kembaliKeModalPembayaran() {
+            document.getElementById('modalReview').style.display = 'none';
+            document.getElementById('modalPembayaran').style.display = 'block';
+        }
+
+        function kirimFormKasir() {
+            document.getElementById('btn_submit_asli').click();
         }
     </script>
 </body>
