@@ -8,7 +8,7 @@ if (isset($_SESSION['kasir_id']) == false) {
     exit;
 }
 
-// 1. CARI PENDAPATAN HARI INI
+// CARI PENDAPATAN HARI INI
 $tanya_pendapatan = mysqli_query($conn, "SELECT SUM(total_belanja) AS total_uang FROM transaksi WHERE DATE(waktu_transaksi) = CURDATE()");
 $data_pendapatan = mysqli_fetch_assoc($tanya_pendapatan);
 $uang_hari_ini = $data_pendapatan['total_uang'];
@@ -16,21 +16,21 @@ if ($uang_hari_ini == null) {
     $uang_hari_ini = 0;
 }
 
-// 2. CARI TRANSAKSI HARI INI
+// CARI TRANSAKSI HARI INI
 $tanya_transaksi = mysqli_query($conn, "SELECT COUNT(id) AS jumlah FROM transaksi WHERE DATE(waktu_transaksi) = CURDATE()");
 $jumlah_transaksi = mysqli_fetch_assoc($tanya_transaksi)['jumlah'];
 
-// 3. CARI JUMLAH JENIS BARANG
+// CARI JUMLAH JENIS BARANG
 $tanya_produk = mysqli_query($conn, "SELECT COUNT(id) AS jumlah FROM produk");
 $jumlah_produk = mysqli_fetch_assoc($tanya_produk)['jumlah'];
 
-// 4. CARI BARANG MAU HABIS
+// CARI BARANG MAU HABIS
 $barang_mau_habis = mysqli_query($conn, "SELECT * FROM produk WHERE stok <= 10");
 
-// 5. CARI 5 TRANSAKSI TERBARU
+// CARI 5 TRANSAKSI TERBARU
 $transaksi_terbaru = mysqli_query($conn, "SELECT t.*, u.username FROM transaksi t JOIN users u ON t.kasir_id = u.id ORDER BY t.waktu_transaksi DESC LIMIT 5");
 
-// 6. GRAFIK PENJUALAN MINGGUAN
+// GRAFIK PENJUALAN MINGGUAN
 $filter_grafik = $_GET['filter_grafik'] ?? 'harian';
 $keranjang_hari = [];
 $keranjang_uang = [];

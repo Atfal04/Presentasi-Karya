@@ -9,44 +9,33 @@ if (isset($_SESSION['kasir_id']) == false) {
     exit;
 }
 
-// =====================================================================
-// 2. LOGIKA JIKA TOMBOL BAYAR DITEKAN OLEH KASIR
-// =====================================================================
+// LOGIKA JIKA TOMBOL BAYAR DITEKAN OLEH KASIR
 if (isset($_POST['tombol_submit_bayar'])) {
 
-    // Ambil tagihan, uang pelanggan, perhitungan, dan tipe
     $total_tagihan = $_POST['total_tagihan_rahasia'];
     $uang_dari_pelanggan = $_POST['uang_pelanggan'];
     $uang_kembalian = $uang_dari_pelanggan - $total_tagihan;
     $tipe_pembayaran = $_POST['tipe_pembayaran_rahasia'] ?? 'Tunai';
 
-    // Ubah data keranjang (yang dikirim Javascript) jadi daftar yang bisa dibaca PHP
     $daftar_belanjaan = json_decode($_POST['data_keranjang_rahasia'], true);
 
-    // Kalau uang pelanggan cukup, tagihan tidak 0, dan keranjang tidak kosong
     if ($uang_dari_pelanggan >= $total_tagihan && $total_tagihan > 0 && !empty($daftar_belanjaan)) {
 
-        // 1. Simpan ke buku riwayat transaksi utama
         $id_kasir_yang_jaga = $_SESSION['kasir_id'];
         mysqli_query($conn, "INSERT INTO transaksi (kasir_id, total_belanja, uang_bayar, kembalian, tipe_pembayaran) VALUES ('$id_kasir_yang_jaga', '$total_tagihan', '$uang_dari_pelanggan', '$uang_kembalian', '$tipe_pembayaran')");
         
-        // Ambil ID Transaksi yang baru saja dibuat
         $transaksi_id_baru = mysqli_insert_id($conn);
 
-        // 2. Buka daftar keranjang satu per satu
         foreach ($daftar_belanjaan as $barang) {
             $id_yang_dibeli = $barang['id_barang'];
             $jumlah_yang_dibeli = $barang['jumlah'];
             $harga_satuan_dibeli = $barang['harga_satuan'];
             
-            // Masukkan rincian barang ke tabel relasi transaksi_detail
             mysqli_query($conn, "INSERT INTO transaksi_detail (transaksi_id, produk_id, jumlah, harga_satuan) VALUES ('$transaksi_id_baru', '$id_yang_dibeli', '$jumlah_yang_dibeli', '$harga_satuan_dibeli')");
 
-            // Kurangi stoknya di gudang produk
             mysqli_query($conn, "UPDATE produk SET stok = stok - $jumlah_yang_dibeli WHERE id = '$id_yang_dibeli'");
         }
 
-        // Nyalakan mode print struk
         $tampilkan_struk = true;
         $cetak_total = $total_tagihan;
         $cetak_bayar = $uang_dari_pelanggan;
@@ -54,7 +43,7 @@ if (isset($_POST['tombol_submit_bayar'])) {
     }
 }
 
-// 3. AMBIL SEMUA BARANG DARI GUDANG UNTUK DIPAJANG DI KIRI
+// AMBIL SEMUA BARANG DARI GUDANG UNTUK DIPAJANG DI KIRI
 $semua_barang_toko = mysqli_query($conn, "SELECT * FROM produk ORDER BY nama_produk ASC");
 ?>
 <!DOCTYPE html>
@@ -159,7 +148,7 @@ $semua_barang_toko = mysqli_query($conn, "SELECT * FROM produk ORDER BY nama_pro
         </script>
     <?php endif; ?>
 
-    <!-- MODAL 1: Pilih Pembayaran -->
+    <!--  Pilih Pembayaran -->
     <div id="modalPembayaran" class="modal-overlay">
         <div class="modal-box">
             <h3 class="modal-title">💳 Pilih Pembayaran</h3>
@@ -182,13 +171,12 @@ $semua_barang_toko = mysqli_query($conn, "SELECT * FROM produk ORDER BY nama_pro
         </div>
     </div>
 
-    <!-- MODAL 2: Review Pesanan -->
+    <!-- Review Pesanan -->
     <div id="modalReview" class="modal-overlay">
         <div class="modal-box">
             <h3 class="modal-title">🧾 Review Pesanan</h3>
             
             <div id="detail-review" style="background:#f8f9fa; padding:15px; border:2px solid #000; border-radius:4px; margin-bottom:20px; max-height:200px; overflow-y:auto;">
-                <!-- Item keranjang -->
             </div>
 
             <div style="margin-bottom: 20px;">
@@ -210,7 +198,7 @@ $semua_barang_toko = mysqli_query($conn, "SELECT * FROM produk ORDER BY nama_pro
     </div>
 
     <script>
-        // 1. FUNGSI PENCARIAN BARANG
+        // FUNGSI PENCARIAN BARANG
         function cariBarangPintar() {
             let tulisan_dicari = document.getElementById("kotak_pencarian").value.toLowerCase();
             let semua_kotak_barang = document.querySelectorAll(".kotak-barang");
@@ -226,10 +214,9 @@ $semua_barang_toko = mysqli_query($conn, "SELECT * FROM produk ORDER BY nama_pro
             }
         }
 
-        // Keranjang disiapkan kosong
         let keranjang_belanja = [];
 
-        // 2. FUNGSI TAMBAH BARANG KE KERANJANG
+        // FUNGSI TAMBAH BARANG KE KERANJANG
         function tambahKeKeranjang(id_dipilih, nama_dipilih, harga_dipilih, stok_di_toko) {
             let barang_sudah_ada = false;
 
@@ -257,7 +244,7 @@ $semua_barang_toko = mysqli_query($conn, "SELECT * FROM produk ORDER BY nama_pro
             gambarUlangLayarKeranjang();
         }
 
-        // 3. FUNGSI KURANGI BARANG DARI KERANJANG
+        // FUNGSI KURANGI BARANG DARI KERANJANG
         function kurangiDariKeranjang(id_dipilih) {
             for (let urutan = 0; urutan < keranjang_belanja.length; urutan++) {
                 if (keranjang_belanja[urutan].id_barang == id_dipilih) {
@@ -271,7 +258,7 @@ $semua_barang_toko = mysqli_query($conn, "SELECT * FROM produk ORDER BY nama_pro
             gambarUlangLayarKeranjang();
         }
 
-        // 4. FUNGSI MENGGAMBAR KOTAK KERANJANG PERSIS SEPERTI DI FOTO
+        // FUNGSI MENGGAMBAR KOTAK KERANJANG PERSIS SEPERTI DI FOTO
         function gambarUlangLayarKeranjang() {
             let tempat_gambar = document.getElementById('layar_keranjang');
             tempat_gambar.innerHTML = "";
@@ -290,33 +277,28 @@ $semua_barang_toko = mysqli_query($conn, "SELECT * FROM produk ORDER BY nama_pro
                 let sub_total = barang.harga_satuan * barang.jumlah;
                 total_bayar += sub_total;
 
-                // --- KODE HTML DESAIN KOTAK PUTIH KERANJANG ---
                 let desain_html = '<div style="background: white; padding: 15px; margin-bottom: 12px; border: 2px solid #000; border-radius: 8px;">';
 
-                // Baris Atas (Nama Barang & Harga Hijau Tosca)
                 desain_html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">';
                 desain_html += '<span style="color: #202124; font-weight: 900; font-size:16px;">' + barang.nama_barang + '</span>';
                 desain_html += '<span style="color: #1abc9c; font-weight: 900; font-size:16px;">Rp ' + sub_total.toLocaleString('id-ID') + '</span>';
                 desain_html += '</div>';
 
-                // Baris Bawah (Tombol Minus, Angka, Tombol Plus)
                 desain_html += '<div style="display: flex; align-items: center; gap: 15px;">';
                 desain_html += '<button type="button" onclick="kurangiDariKeranjang(' + barang.id_barang + ')" style="background: #EA4335; color: white; border: 2px solid #000; width: 35px; height: 35px; font-weight: 900; border-radius: 4px; cursor: pointer; box-shadow: 2px 2px 0 #000; font-size: 16px;">-</button>';
                 desain_html += '<span style="font-weight: 900; color: #202124; font-size:16px; width: 20px; text-align: center;">' + barang.jumlah + '</span>';
                 desain_html += '<button type="button" onclick="tambahKeKeranjang(' + barang.id_barang + ', \'' + barang.nama_barang + '\', ' + barang.harga_satuan + ', ' + barang.maksimal_stok + ')" style="background: #4285F4; color: white; border: 2px solid #000; width: 35px; height: 35px; font-weight: 900; border-radius: 4px; cursor: pointer; box-shadow: 2px 2px 0 #000; font-size: 16px;">+</button>';
                 desain_html += '</div></div>';
-                // ----------------------------------------------
 
                 tempat_gambar.innerHTML += desain_html;
             }
 
-            // Perbarui tulisan layar dan isi data tersembunyi
             document.getElementById('layar_total_harga').innerHTML = "Total: Rp " + total_bayar.toLocaleString('id-ID');
             document.getElementById('input_total').value = total_bayar;
             document.getElementById('input_data_keranjang').value = JSON.stringify(keranjang_belanja);
         }
 
-        // 5. ALUR PAYMENT MODALS (FUNGSI BARU)
+        // ALUR PAYMENT MODALS
         let metodeAktif = 'Tunai';
 
         function bukaModalPembayaran() {

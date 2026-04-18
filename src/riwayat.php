@@ -113,7 +113,6 @@ if (isset($_SESSION['kasir_id']) == false) {
                             <td style="font-weight:700; color:#EA4335;">Rp <?= number_format($data_riwayat['kembalian'], 0, ',', '.') ?></td>
                         </tr>
                     <?php endwhile; ?>
-                    <!-- Baris Total Penjumlahan -->
                     <tr style="background-color: #fbbc04; color: #000; border-top: 4px solid #000;">
                         <td colspan="3" style="text-align:right; font-weight:900; font-size:16px; text-transform:uppercase;">Total Pendapatan:</td>
                         <td style="font-weight:900; font-size:18px;">Rp <?= number_format($sum_total, 0, ',', '.') ?></td>

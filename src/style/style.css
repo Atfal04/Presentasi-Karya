@@ -1,8 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap");
 
-/* =========================================
-   1. PENGATURAN DASAR
-========================================= */
+/* PENGATURAN DASAR */
 * {
   margin: 0;
   padding: 0;
@@ -16,9 +14,7 @@ body {
   overflow-x: hidden;
 }
 
-/* =========================================
-   2. NAVBAR
-========================================= */
+/* NAVBAR */
 .navbar {
   background-color: #ffffff;
   padding: 15px 30px;
@@ -58,9 +54,7 @@ body {
   border: 2px solid #000;
 }
 
-/* =========================================
-   3. KOTAK UMUM
-========================================= */
+/* KOTAK UMUM */
 .container {
   padding: 0 30px 30px 30px;
   max-width: 1200px;
@@ -100,9 +94,7 @@ body {
   min-width: 0;
 }
 
-/* =========================================
-   4. TOMBOL-TOMBOL
-========================================= */
+/* TOMBOL-TOMBOL */
 .btn-hijau {
   background-color: #39ff14;
   color: #000;
@@ -160,9 +152,7 @@ body {
   box-shadow: 0.4rem 0.4rem 0 rgba(0, 0, 0, 1);
 }
 
-/* =========================================
-   5. HALAMAN LOGIN & DAFTAR
-========================================= */
+/* HALAMAN LOGIN & DAFTAR */
 .layar-login {
   display: flex;
   justify-content: center;
@@ -201,9 +191,7 @@ body {
   box-shadow: 0.4rem 0.4rem 0 rgba(0, 0, 0, 1);
 }
 
-/* =========================================
-   6. TABEL BRUTALISM
-========================================= */
+/* TABEL */
 .wadah-tabel {
   width: 100%;
   overflow-x: auto;
@@ -232,9 +220,7 @@ body {
   border-bottom: 4px solid #000;
 }
 
-/* =========================================
-   7. HALAMAN KASIR
-========================================= */
+/* HALAMAN KASIR */
 .wadah-kasir-scroll {
   width: 100%;
   overflow-x: auto;
@@ -242,8 +228,6 @@ body {
 .kasir-wrapper {
   display: flex;
   flex-direction: row;
-
-  /* INI MANTRA AJAIBNYA: 'stretch' memaksa kotak hitam mentok ke bawah lantai */
   align-items: stretch;
 
   gap: 20px;
@@ -256,7 +240,6 @@ body {
   width: 65%;
   overflow-y: auto;
   padding-right: 10px;
-  /* Dihapus batasan tingginya agar mengikuti lantai (stretch) */
 }
 
 .area-kanan {
@@ -267,7 +250,6 @@ body {
   padding: 20px;
   border: 2px solid #000;
   box-shadow: 0.25rem 0.25rem 0 rgba(0, 0, 0, 1);
-  /* Dihapus max-height nya agar bebas memanjang sampai bawah */
 }
 
 .product-grid {
@@ -302,9 +284,7 @@ body {
   padding-right: 10px;
 }
 
-/* =========================================
-   8. STRUK PRINT
-========================================= */
+/* STRUK PRINT */
 #area-struk {
   display: none;
 }
@@ -321,12 +301,12 @@ body {
     display: block !important;
   }
   @page {
-    margin: 10mm; /* Added basic margin so print is not squished to edge */
+    margin: 10mm;
   }
   body {
     margin: 0;
     padding: 0;
-    background: #fff; /* Ensure white bg */
+    background: #fff; 
   }
 
   .container {
@@ -372,9 +352,7 @@ body {
   }
 }
 
-/* =========================================
-   8.5 POPUP MODALS
-========================================= */
+/* POPUP MODALS */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -449,9 +427,7 @@ body {
   color: black;
 }
 
-/* =========================================
-   9. SENSOR HP (DASHBOARD, INVENTORY, RIWAYAT)
-========================================= */
+/* SENSOR HP (DASHBOARD, INVENTORY, RIWAYAT) */
 @media screen and (max-width: 800px) {
   .navbar {
     flex-direction: column;

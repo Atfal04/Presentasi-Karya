@@ -13,24 +13,18 @@ $pesan_error = "";
 
 // JIKA TOMBOL "MASUK" DITEKAN
 if (isset($_POST['tombol_login'])) {
-    // Ambil isian dari kolom username dan password
     $username_diketik = $_POST['username'];
-    // Password dienkripsi dengan MD5 agar cocok dengan format saat mendaftar
     $password_diketik = md5($_POST['password']);
-    // Cari di database: "Adakah user dengan username dan password ini?"
     $cari_user = mysqli_query($conn, "SELECT * FROM users WHERE username='$username_diketik' AND password='$password_diketik'");
 
     // Jika datanya ditemukan (jumlah baris lebih dari 0)
     if (mysqli_num_rows($cari_user) > 0) {
-        // Buka datanya
         $data_user = mysqli_fetch_assoc($cari_user);
-        // Simpan ID dan Username ke dalam memori Sesi (Session)
         $_SESSION['kasir_id'] = $data_user['id'];
         $_SESSION['username'] = $data_user['username'];
         header("Location: dashboard.php");
         exit;
     } else {
-        // Jika tidak ditemukan, isi variabel pesan error
         $pesan_error = "Username atau Password salah!";
     }
 }

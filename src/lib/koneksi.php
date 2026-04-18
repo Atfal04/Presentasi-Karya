@@ -27,7 +27,7 @@ mysqli_query($conn, "ALTER TABLE users ENGINE=InnoDB");
 mysqli_query($conn, "ALTER TABLE transaksi ENGINE=InnoDB");
 mysqli_query($conn, "ALTER TABLE produk ENGINE=InnoDB");
 
-// Tambahkan Relasi Foreign Key (FK) dari transaksi.kasir_id -> users.id jika belum ada
+// Tambahkan Relasi Foreign Key (FK) 
 try {
     $cek_fk = mysqli_query($conn, "SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = 'tepatkasir' AND TABLE_NAME = 'transaksi' AND CONSTRAINT_TYPE = 'FOREIGN KEY' AND CONSTRAINT_NAME = 'fk_transaksi_kasir'");
     if ($cek_fk && mysqli_num_rows($cek_fk) == 0) {
@@ -39,10 +39,9 @@ try {
         mysqli_query($conn, "ALTER TABLE transaksi ADD CONSTRAINT fk_transaksi_kasir FOREIGN KEY (kasir_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE");
     }
 } catch (\Throwable $e) {
-    // Abaikan error secara diam-diam agar aplikasi tidak crash
 }
 
-// Buat tabel transaksi_detail untuk merinci barang yang dibeli (Many-to-Many bridge)
+// Buat tabel transaksi_detail untuk merinci barang yang dibeli
 mysqli_query($conn, "
     CREATE TABLE IF NOT EXISTS transaksi_detail (
         id INT AUTO_INCREMENT PRIMARY KEY,
