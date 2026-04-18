@@ -31,18 +31,55 @@ $barang_mau_habis = mysqli_query($conn, "SELECT * FROM produk WHERE stok <= 10")
 $transaksi_terbaru = mysqli_query($conn, "SELECT t.*, u.username FROM transaksi t JOIN users u ON t.kasir_id = u.id ORDER BY t.waktu_transaksi DESC LIMIT 5");
 
 // 6. GRAFIK PENJUALAN MINGGUAN
+$filter_grafik = $_GET['filter_grafik'] ?? 'harian';
 $keranjang_hari = [];
 $keranjang_uang = [];
-for ($angka = 6; $angka >= 0; $angka--) {
-    $tanggal_dicari = date('Y-m-d', strtotime("-$angka days"));
-    $tanya_grafik = mysqli_query($conn, "SELECT SUM(total_belanja) AS uang_masuk FROM transaksi WHERE DATE(waktu_transaksi) = '$tanggal_dicari'");
-    $buka_grafik = mysqli_fetch_assoc($tanya_grafik);
+$judul_grafik = "📈 Grafik Penjualan";
 
-    $keranjang_hari[] = date('d M', strtotime($tanggal_dicari));
-    if ($buka_grafik['uang_masuk'] == null) {
-        $keranjang_uang[] = 0;
-    } else {
-        $keranjang_uang[] = $buka_grafik['uang_masuk'];
+if ($filter_grafik === 'harian') {
+    $judul_grafik .= " (7 Hari Terakhir)";
+    for ($angka = 6; $angka >= 0; $angka--) {
+        $tanggal_dicari = date('Y-m-d', strtotime("-$angka days"));
+        $tanya_grafik = mysqli_query($conn, "SELECT SUM(total_belanja) AS uang_masuk FROM transaksi WHERE DATE(waktu_transaksi) = '$tanggal_dicari'");
+        $buka_grafik = mysqli_fetch_assoc($tanya_grafik);
+        
+        $keranjang_hari[] = date('d M', strtotime($tanggal_dicari));
+        $keranjang_uang[] = $buka_grafik['uang_masuk'] ? (int)$buka_grafik['uang_masuk'] : 0;
+    }
+} elseif ($filter_grafik === 'mingguan') {
+    $judul_grafik .= " (4 Minggu Terakhir)";
+    for ($angka = 3; $angka >= 0; $angka--) {
+        // Rentang waktu mingguan
+        $akhir_minggu = date('Y-m-d', strtotime("-$angka weeks"));
+        $awal_minggu = date('Y-m-d', strtotime("-$angka weeks -6 days"));
+        
+        $tanya_grafik = mysqli_query($conn, "SELECT SUM(total_belanja) AS uang_masuk FROM transaksi WHERE DATE(waktu_transaksi) BETWEEN '$awal_minggu' AND '$akhir_minggu'");
+        $buka_grafik = mysqli_fetch_assoc($tanya_grafik);
+        
+        $keranjang_hari[] = date('d M', strtotime($awal_minggu)) . " - " . date('d M', strtotime($akhir_minggu));
+        $keranjang_uang[] = $buka_grafik['uang_masuk'] ? (int)$buka_grafik['uang_masuk'] : 0;
+    }
+} elseif ($filter_grafik === 'bulanan') {
+    $judul_grafik .= " (Tahun " . date('Y') . ")";
+    $nama_bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+    $tahun_ini = date('Y');
+    for ($m = 1; $m <= 12; $m++) {
+        $tanya_grafik = mysqli_query($conn, "SELECT SUM(total_belanja) AS uang_masuk FROM transaksi WHERE MONTH(waktu_transaksi) = $m AND YEAR(waktu_transaksi) = $tahun_ini");
+        $buka_grafik = mysqli_fetch_assoc($tanya_grafik);
+        
+        $keranjang_hari[] = $nama_bulan[$m - 1];
+        $keranjang_uang[] = $buka_grafik['uang_masuk'] ? (int)$buka_grafik['uang_masuk'] : 0;
+    }
+} elseif ($filter_grafik === 'tahunan') {
+    $judul_grafik .= " (5 Tahun Terakhir)";
+    $tahun_sekarang = (int)date('Y');
+    for ($t = 4; $t >= 0; $t--) {
+        $tahun_tujuan = $tahun_sekarang - $t;
+        $tanya_grafik = mysqli_query($conn, "SELECT SUM(total_belanja) AS uang_masuk FROM transaksi WHERE YEAR(waktu_transaksi) = $tahun_tujuan");
+        $buka_grafik = mysqli_fetch_assoc($tanya_grafik);
+        
+        $keranjang_hari[] = (string)$tahun_tujuan;
+        $keranjang_uang[] = $buka_grafik['uang_masuk'] ? (int)$buka_grafik['uang_masuk'] : 0;
     }
 }
 ?>
@@ -89,8 +126,23 @@ for ($angka = 6; $angka >= 0; $angka--) {
         </div>
 
         <div class="box-putih">
-            <h3 style="margin-top:0; border-bottom: 2px solid #000; padding-bottom:10px;">📈 Grafik Penjualan (7 Hari)</h3>
-            <div style="height: 250px; margin-top:20px; width: 100%; position: relative;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #000; padding-bottom:10px; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+                <h3 style="margin:0;"><?= $judul_grafik ?></h3>
+                <form method="GET" style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <?php 
+                        function gayaButton($aktif) {
+                            return $aktif ? 'background:#202124; color:#fff; cursor:pointer; padding:6px 14px; border:2px solid #000; font-weight:800; border-radius:3px; box-shadow:2px 2px 0px #000;' 
+                                          : 'background:#fff; color:#000; cursor:pointer; padding:6px 14px; border:2px solid #000; font-weight:800; border-radius:3px; box-shadow:2px 2px 0px #000; opacity:0.8;';
+                        }
+                    ?>
+                    <button type="submit" name="filter_grafik" value="harian" style="<?= gayaButton($filter_grafik === 'harian') ?>">Harian</button>
+                    <button type="submit" name="filter_grafik" value="mingguan" style="<?= gayaButton($filter_grafik === 'mingguan') ?>">Mingguan</button>
+                    <button type="submit" name="filter_grafik" value="bulanan" style="<?= gayaButton($filter_grafik === 'bulanan') ?>">Bulanan</button>
+                    <button type="submit" name="filter_grafik" value="tahunan" style="<?= gayaButton($filter_grafik === 'tahunan') ?>">Tahunan</button>
+                </form>
+            </div>
+            
+            <div style="height: 250px; width: 100%; position: relative;">
                 <canvas id="tempat_gambar_grafik"></canvas>
             </div>
         </div>

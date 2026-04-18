@@ -65,4 +65,4 @@ if (isset($_POST['tombol_daftar'])) {
 
 </body>
 
-</html>
+</html>   
