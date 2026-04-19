@@ -115,13 +115,13 @@ $semua_daftar_barang = mysqli_query($conn, "SELECT * FROM produk ORDER BY id DES
                     📦 Tambah Barang Baru
                 </h2>
 
-                <form method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: center;">
+                <form id="form-tambah-barang" method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: center;">
                     <input type="text" name="isian_nama" class="kolom-ketik" placeholder="Nama Barang" required style="margin-bottom:0;">
                     <input type="number" name="isian_harga" class="kolom-ketik" placeholder="Harga (Rp)" required min="0" oninput="if(this.value < 0) this.value = 0;" style="margin-bottom:0;">
                     <input type="number" name="isian_stok" class="kolom-ketik" placeholder="Jumlah Stok" required min="0" oninput="if(this.value < 0) this.value = 0;" style="margin-bottom:0;">
                     <input type="text" name="isian_satuan" class="kolom-ketik" placeholder="Satuan (Pcs/Kg)" required style="margin-bottom:0;">
 
-                    <button type="submit" name="tombol_simpan_barang" class="btn-biru" style="padding:15px; width:100%;">SIMPAN</button>
+                    <button type="button" onclick="tampilkanModalKonfirmasi()" class="btn-biru" style="padding:15px; width:100%;">SIMPAN</button>
                 </form>
 
             <?php } ?>
@@ -168,6 +168,54 @@ $semua_daftar_barang = mysqli_query($conn, "SELECT * FROM produk ORDER BY id DES
         </div>
 
     </div>
+
+    <!-- MODAL KONFIRMASI TAMBAH BARANG -->
+    <div id="modal-konfirmasi" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
+        <div class="box-putih" style="width: 90%; max-width: 400px; text-align: center; padding: 30px; animation: popup 0.3s ease-out;">
+            <div style="font-size: 50px; margin-bottom: 10px;">📦</div>
+            <h2 style="margin-top: 0; color: #202124;">Konfirmasi Simpan</h2>
+            <p style="font-weight: 600; color: #636e72; margin-bottom: 25px;">Apakah kamu yakin ingin menambah barang baru ini ke dalam gudang?</p>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button onclick="tutupModal()" class="btn-merah" style="padding: 12px 20px; flex: 1;">Batal</button>
+                <button onclick="submitFormTambah()" class="btn-biru" style="padding: 12px 20px; flex: 1;">Ya, Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes popup {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
+
+    <script>
+        function tampilkanModalKonfirmasi() {
+            var form = document.getElementById('form-tambah-barang');
+            // Cek apakah semua input sudah diisi sesuai requirement HTML
+            if (form.checkValidity()) {
+                document.getElementById('modal-konfirmasi').style.display = 'flex';
+            } else {
+                form.reportValidity(); // Menampilkan pesan error bawaan browser
+            }
+        }
+
+        function tutupModal() {
+            document.getElementById('modal-konfirmasi').style.display = 'none';
+        }
+
+        function submitFormTambah() {
+            var form = document.getElementById('form-tambah-barang');
+            // Tambahkan input hidden agar PHP bisa mendeteksi bahwa form telah di-submit
+            var inputHidden = document.createElement('input');
+            inputHidden.type = 'hidden';
+            inputHidden.name = 'tombol_simpan_barang';
+            inputHidden.value = '1';
+            form.appendChild(inputHidden);
+            
+            form.submit();
+        }
+    </script>
 </body>
 
 </html>
